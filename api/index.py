@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-from .za_business_time_delta.za_business_time_delta import get_time_delta
+from za_business_time_delta.za_business_time_delta import get_time_delta
 
 app = Flask(__name__)
 
