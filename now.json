@@ -1,0 +1,7 @@
+{
+	"version": 2,
+    "name": "za-business-time-delta",
+	"routes": [
+		{ "src": "/(.*)", "dest": "api/index.py" }
+	]
+}
