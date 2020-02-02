@@ -1,0 +1,130 @@
+The ``za_business_time_delta`` module
+=======================
+
+
+The ``get_time_delta`` function
+--------------------------
+
+Import statement:
+
+    >>> from za_business_time_delta.za_business_time_delta import get_time_delta # doctest: +SKIP
+
+Tests:
+
+    # During weekend
+    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22+00:00') # doctest: +SKIP
+    0
+    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22+01:00') # doctest: +SKIP
+    0
+    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22-01:00') # doctest: +SKIP
+    0
+    >>> get_time_delta('2020-02-01T07:36:12Z', '2020-02-01T07:36:22Z') # doctest: +SKIP
+    0
+    >>> get_time_delta('20200201T073612Z', '20200201T073622Z') # doctest: +SKIP
+    0
+
+    # During public holiday weekday
+    >>> get_time_delta('2020-01-01T07:36:12+00:00', '2020-02-01T07:36:22+00:00') # doctest: +SKIP
+    0
+    >>> get_time_delta('2020-01-01T07:36:12+00:00', '2020-02-01T07:36:22+01:00') # doctest: +SKIP
+    0
+    >>> get_time_delta('2020-01-01T07:36:12Z', '2020-02-01T07:36:22Z') # doctest: +SKIP
+    0
+    >>> get_time_delta('20200101T073612Z', '20200201T073622Z') # doctest: +SKIP
+    0
+    >>> get_time_delta('20200101T073612Z+0000', '20200201T073622Z+0000') # doctest: +SKIP
+    0
+
+    # Test with fractions of a second
+    >>> get_time_delta('2020-02-04T07:36:12.123456+00:00', '2020-02-01T07:36:22.123456+00:00') # doctest: +SKIP
+    10
+
+
+The ``get_iso8601_datetime`` function
+--------------------------
+
+Import statement:
+
+    >>> from za_business_time_delta.za_business_time_delta import get_iso8601_datetime
+
+Tests:
+
+    >>> get_iso8601_datetime('19850412T1015')
+    datetime.datetime(1985, 4, 12, 10, 15)
+    >>> get_iso8601_datetime('1985-04-12T10:15')
+    datetime.datetime(1985, 4, 12, 10, 15)
+    >>> get_iso8601_datetime('1985102T1015Z')
+    datetime.datetime(1985, 4, 12, 10, 15, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('1985-102T10:15Z')
+    datetime.datetime(1985, 4, 12, 10, 15, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('1985W155T1015+0400')
+    datetime.datetime(1985, 4, 12, 10, 15, tzinfo=datetime.timezone(datetime.timedelta(0, 14400)))
+    >>> get_iso8601_datetime('1985-W15-5T10:15+04')
+    datetime.datetime(1985, 4, 12, 10, 15, tzinfo=datetime.timezone(datetime.timedelta(0, 14400)))
+    >>> get_iso8601_datetime('1985-W15-5T10:15-0430')
+    datetime.datetime(1985, 4, 12, 10, 15, tzinfo=datetime.timezone(datetime.timedelta(-1, 70200)))
+    >>> get_iso8601_datetime('1985-W15-5T10:15+04:45')
+    datetime.datetime(1985, 4, 12, 10, 15, tzinfo=datetime.timezone(datetime.timedelta(0, 17100)))
+    >>> get_iso8601_datetime('20110410T101225.123000Z')
+    datetime.datetime(2011, 4, 10, 10, 12, 25, 123000, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('2012-10-12T08:29:46.069178Z')
+    datetime.datetime(2012, 10, 12, 8, 29, 46, 69178, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('2012-10-12T08:29:46.691780Z')
+    datetime.datetime(2012, 10, 12, 8, 29, 46, 691780, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('2012-10-30T08:55:22.123456Z')
+    datetime.datetime(2012, 10, 30, 8, 55, 22, 123456, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('2012-10-30T08:55:22.123456Z')
+    datetime.datetime(2012, 10, 30, 8, 55, 22, 123456, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('2014-08-18 14:55:22.123456Z')
+    Traceback (most recent call last):
+    ValueError: 2014-08-18 14:55:22.123456Z does not conform to an ISO 8601 compatible format.
+
+    # See https://en.wikipedia.org/wiki/ISO_week_date
+    >>> get_iso8601_datetime('2004-W53-6T01:02')
+    datetime.datetime(2005, 1, 1, 1, 2)
+    >>> get_iso8601_datetime('2004-W53-7T01:02:04')
+    datetime.datetime(2005, 1, 2, 1, 2, 4)
+    >>> get_iso8601_datetime('2005-W52-6T01:02:04.123456')
+    datetime.datetime(2005, 12, 31, 1, 2, 4, 123456)
+
+    >>> get_iso8601_datetime('2005W527T0102')
+    datetime.datetime(2006, 1, 1, 1, 2)
+    >>> get_iso8601_datetime('2006W011T010204')
+    datetime.datetime(2006, 1, 2, 1, 2, 4)
+    >>> get_iso8601_datetime('2006W527T010204.123456')
+    datetime.datetime(2006, 12, 31, 1, 2, 4, 123456)
+
+    >>> get_iso8601_datetime('2006-001T01:02')
+    datetime.datetime(2006, 1, 1, 1, 2)
+    >>> get_iso8601_datetime('2006-002T01:02:04')
+    datetime.datetime(2006, 1, 2, 1, 2, 4)
+    >>> get_iso8601_datetime('2006365T010204.123456')
+    datetime.datetime(2006, 12, 31, 1, 2, 4, 123456)
+
+    >>> get_iso8601_datetime('2005001T0102')
+    datetime.datetime(2005, 1, 1, 1, 2)
+    >>> get_iso8601_datetime('2005002T010204')
+    datetime.datetime(2005, 1, 2, 1, 2, 4)
+    >>> get_iso8601_datetime('2005365T010204.123456789')
+    datetime.datetime(2005, 12, 31, 1, 2, 4, 123456)
+
+    >>> get_iso8601_datetime('2006-01-01T01:02')
+    datetime.datetime(2006, 1, 1, 1, 2)
+    >>> get_iso8601_datetime('2006-01-02T01:02:04')
+    datetime.datetime(2006, 1, 2, 1, 2, 4)
+    >>> get_iso8601_datetime('2006-12-31T01:02:04.123456789')
+    datetime.datetime(2006, 12, 31, 1, 2, 4, 123456)
+
+    >>> get_iso8601_datetime('20050101T0102')
+    datetime.datetime(2005, 1, 1, 1, 2)
+    >>> get_iso8601_datetime('20050102T010204')
+    datetime.datetime(2005, 1, 2, 1, 2, 4)
+    >>> get_iso8601_datetime('20051231T010204.123456')
+    datetime.datetime(2005, 12, 31, 1, 2, 4, 123456)
+    >>> get_iso8601_datetime('20051231T010204.123456Z')
+    datetime.datetime(2005, 12, 31, 1, 2, 4, 123456, tzinfo=datetime.timezone.utc)
+    >>> get_iso8601_datetime('20051231T010204.123456789+01:00')
+    datetime.datetime(2005, 12, 31, 1, 2, 4, 123456, tzinfo=datetime.timezone(datetime.timedelta(0, 3600)))
+
+    >>> get_iso8601_datetime('2005-12-31T01.5000000') # doctest: +SKIP
+    datetime.datetime(2005, 12, 31, 1, 30)
