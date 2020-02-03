@@ -90,7 +90,14 @@ def get_time_delta(start_time: str, end_time: str) -> int:
     start_datetime = get_iso8601_datetime(start_time)
     end_datetime = get_iso8601_datetime(end_time)
 
-    # Convert into South Afrian Standard Time (SAST) so that we can check hours against 8 or 17 (start/end of workday)
+    # Todo: Current implementation could do with improvement in terms of efficiency. With that in mind, for now, we are
+    #       going to limit max time delta to an arbitrary 40,000 days, else request time will likely be too slow.
+    day_delta = (end_datetime - start_datetime).days
+    if day_delta > 40000:
+        raise ValueError(f'Time delta of {day_delta} days, exceeds 40000 days that is currently supported. Please '
+                         f'try again with shorter time delta.')
+
+    # Convert into South African Standard Time (SAST) so that we can check hours against 8 or 17 (start/end of workday)
     za_start_datetime = start_datetime.astimezone(pytz.timezone('Africa/Johannesburg'))
     za_end_datetime = end_datetime.astimezone(pytz.timezone('Africa/Johannesburg'))
 
