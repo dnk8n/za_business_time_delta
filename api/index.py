@@ -60,6 +60,9 @@ def get_time_delta_api():
     start_time = request.args.get('start_time', None)
     end_time = request.args.get('end_time', None)
     if start_time and end_time:
+        # Sometimes '+' can come through to the GET request parameters as space
+        start_time = start_time.replace(' ', '+')
+        end_time = end_time.replace(' ', '+')
         try:
             return jsonify(get_time_delta(start_time, end_time))
         except ValueError as e:
