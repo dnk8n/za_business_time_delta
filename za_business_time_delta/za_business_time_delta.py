@@ -1,10 +1,13 @@
-import datetime
+from datetime import datetime, time, timedelta
 import re
+
+import holidays
+import pytz
 
 UNCONVERTED_DATA_REMAINS_REGEX = re.compile(r'^unconverted data remains: (\d+)?([-+]\d{2}:?\d{0,2})?$')
 
 
-def get_iso8601_datetime(time_string: str) -> datetime.datetime:
+def get_iso8601_datetime(time_string: str) -> datetime:
     """
     One can't be certain on time format coming in. ISO 8601 can have many forms. This function attempts to support
     the most common ones.
@@ -35,7 +38,7 @@ def get_iso8601_datetime(time_string: str) -> datetime.datetime:
                 '%Y%m%dT%H%M%S.%f'):
         try:
             # For each format, try cast to datetime. If it succeeds it is the datetime wanted
-            return datetime.datetime.strptime(reformatted_time_string, fmt)
+            return datetime.strptime(reformatted_time_string, fmt)
         except ValueError as e:
             uncovered_data = UNCONVERTED_DATA_REMAINS_REGEX.search(str(e))
             # Two reasons for uncovered data, UCT offset and/or more than 6 digits in fraction
@@ -61,7 +64,7 @@ def get_iso8601_datetime(time_string: str) -> datetime.datetime:
                 if uct_offset or ('%f' in fmt and extra_digits):
                     # If either of the above uncovered data conditions occurred, return according to new format
                     try:
-                        return datetime.datetime.strptime(reformatted_time_string, fmt)
+                        return datetime.strptime(reformatted_time_string, fmt)
                     except ValueError:
                         pass
     raise ValueError(f'{time_string} does not conform to an ISO 8601 compatible format.')
@@ -73,16 +76,107 @@ def get_time_delta(start_time: str, end_time: str) -> int:
     business second is a second between 08:00 and 17:00 Monday to Friday, not including a public holiday in the
     Republic of South Africa.
 
-    >>> get_time_delta('2020-02-04T07:36:12+00:00', '2020-02-04T07:36:22+00:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-04T07:36:12+00:00', '2020-02-04T07:36:22+00:00')
     10
-    >>> get_time_delta('2020-02-04T07:36:12+00:00', '2020-02-04T07:36:22+01:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-04T07:36:22+01:00', '2020-02-04T07:36:12+00:00')
     3590
-    >>> get_time_delta('2020-02-04T07:36:22-01:00', '2020-02-04T07:36:12+00:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-04T07:36:12+00:00', '2020-02-04T07:36:22-01:00')
     3610
-    >>> get_time_delta('2020-02-04T07:36:12Z', '2020-02-04T07:36:22Z') # doctest: +SKIP
+    >>> get_time_delta('2020-02-04T07:36:12Z', '2020-02-04T07:36:22Z')
     10
-    >>> get_time_delta('20200204T073612Z', '20200204T073622Z') # doctest: +SKIP
+    >>> get_time_delta('20200204T073612Z', '20200204T073622Z')
     10
     """
-    # Todo: Implement this function: Right now this is just a mock/skeleton to test that deployments are working
-    return int(end_time) - int(start_time)
+    start_datetime = get_iso8601_datetime(start_time)
+    end_datetime = get_iso8601_datetime(end_time)
+
+    # Convert into South Afrian Standard Time (SAST) so that we can check hours against 8 or 17 (start/end of workday)
+    za_start_datetime = start_datetime.astimezone(pytz.timezone('Africa/Johannesburg'))
+    za_end_datetime = end_datetime.astimezone(pytz.timezone('Africa/Johannesburg'))
+
+    this_za_datetime = za_start_datetime
+    one_day = timedelta(days=1)
+    business_seconds = 0
+    za_holidays = holidays.SouthAfrica()
+    while this_za_datetime <= za_end_datetime:
+        #
+        # print(this_za_datetime, za_end_datetime, business_seconds)
+        #
+        if this_za_datetime.date() in za_holidays:
+            #
+            # print('Holiday')
+            #
+            pass
+        elif this_za_datetime.weekday() > 4:
+            #
+            # print('Weekend')
+            #
+            pass
+        else:
+            #
+            # print('Business Day')
+            #
+            if this_za_datetime.time() < time(8, 0, 0):
+                #
+                # print('Before Hours')
+                #
+                if za_end_datetime.date() == this_za_datetime.date():
+                    if za_end_datetime.time() < time(8, 0, 0):
+                        #
+                        # print('No Business day ahead')
+                        #
+                        pass
+                    elif za_end_datetime.time() > time(17, 0, 0):
+                        #
+                        # print('Full Business day ahead')
+                        #
+                        business_seconds += ((17 - 8) * 60 * 60)
+                    else:
+                        #
+                        # print('Part Business day ahead')
+                        #
+                        business_seconds += (int((za_end_datetime - this_za_datetime).total_seconds()))
+                else:
+                    #
+                    # print('Full Business day ahead')
+                    #
+                    business_seconds += ((17 - 8) * 60 * 60)
+            elif this_za_datetime.time() > time(17, 0, 0):
+                #
+                # print('After Hours')
+                #
+                pass
+            else:
+                #
+                # print('Business Hours')
+                #
+                if za_end_datetime.date() == this_za_datetime.date():
+                    if za_end_datetime.time() > time(17, 0, 0):
+                        #
+                        # print('Time difference between start time and 17:00')
+                        #
+                        business_seconds += int((za_end_datetime.replace(hour=17, minute=0, second=0, microsecond=0) - this_za_datetime).total_seconds())
+                    else:
+                        #
+                        # print('Time difference between start time and end time')
+                        #
+                        business_seconds += (int((za_end_datetime - this_za_datetime).total_seconds()))
+                else:
+                    if this_za_datetime.time() < time(8, 0, 0):
+                        #
+                        # print('Full Business day ahead')
+                        #
+                        business_seconds += ((17 - 8) * 60 * 60)
+                    elif this_za_datetime.time() > time(17, 0, 0):
+                        #
+                        # print('No Business day ahead')
+                        #
+                        pass
+                    else:
+                        #
+                        # print('Part Business day ahead')
+                        #
+                        business_seconds += (int((this_za_datetime.replace(hour=17, minute=0, second=0, microsecond=0) - this_za_datetime).total_seconds()))
+        this_za_datetime += one_day
+    return business_seconds
+

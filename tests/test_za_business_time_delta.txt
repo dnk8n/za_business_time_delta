@@ -7,38 +7,81 @@ The ``get_time_delta`` function
 
 Import statement:
 
-    >>> from za_business_time_delta.za_business_time_delta import get_time_delta # doctest: +SKIP
+    >>> from za_business_time_delta.za_business_time_delta import get_time_delta
 
 Tests:
 
     # During weekend
-    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22+00:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22+00:00')
     0
-    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22+01:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22+01:00')
     0
-    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22-01:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-01T07:36:12+00:00', '2020-02-01T07:36:22-01:00')
     0
-    >>> get_time_delta('2020-02-01T07:36:12Z', '2020-02-01T07:36:22Z') # doctest: +SKIP
+    >>> get_time_delta('2020-02-01T07:36:12Z', '2020-02-01T07:36:22Z')
     0
-    >>> get_time_delta('20200201T073612Z', '20200201T073622Z') # doctest: +SKIP
+    >>> get_time_delta('20200201T073612Z', '20200201T073622Z')
     0
 
     # During public holiday weekday
-    >>> get_time_delta('2020-01-01T07:36:12+00:00', '2020-02-01T07:36:22+00:00') # doctest: +SKIP
+    >>> get_time_delta('2019-12-31T15:36:12+00:00', '2020-01-02T07:36:22+00:00')
     0
-    >>> get_time_delta('2020-01-01T07:36:12+00:00', '2020-02-01T07:36:22+01:00') # doctest: +SKIP
+    >>> get_time_delta('2019-12-31T15:36:12+00:00', '2020-01-02T07:36:22+01:00')
     0
-    >>> get_time_delta('2020-01-01T07:36:12Z', '2020-02-01T07:36:22Z') # doctest: +SKIP
+    >>> get_time_delta('2019-12-31T15:36:12Z', '2020-01-02T07:36:22Z')
     0
-    >>> get_time_delta('20200101T073612Z', '20200201T073622Z') # doctest: +SKIP
+    >>> get_time_delta('20191231T153612Z', '20200102T073622Z')
     0
-    >>> get_time_delta('20200101T073612Z+0000', '20200201T073622Z+0000') # doctest: +SKIP
+    >>> get_time_delta('20191231T153612+0000', '20200102T073622+0000')
     0
 
     # Test with fractions of a second
-    >>> get_time_delta('2020-02-04T07:36:12.123456+00:00', '2020-02-01T07:36:22.123456+00:00') # doctest: +SKIP
+    >>> get_time_delta('2020-02-04T07:36:12.1234567+00:00', '2020-02-01T07:36:22.1234567+00:00') # doctest: +SKIP
     10
 
+    # Spanning a year (2020, leap year so 366 days), 10 public holidays not on weekend (see below),
+    # 52 weekends -> 366 - 52 - 52 - 10 -> 252 business days (8164800 secs)
+
+    # 2020-01-01 Wed New Year's Day
+    # 2020-03-21 Sat Human Rights Day
+    # 2020-04-10 Fri Good Friday
+    # 2020-04-13 Mon Family Day
+    # 2020-04-27 Mon Freedom Day
+    # 2020-05-01 Fri Workers' Day
+    # 2020-06-16 Tue Youth Day
+    # 2020-08-09 Sun National Women's Day
+    # 2020-08-10 Mon National Women's Day (Observed)
+    # 2020-09-24 Thu Heritage Day
+    # 2020-12-16 Wed Day of Reconciliation
+    # 2020-12-25 Fri Christmas Day
+    # 2020-12-26 Sat Day of Goodwill
+    >>> get_time_delta('2020-01-01T00:00:00.000000+02:00', '2021-01-01T00:00:00.000000+02:00')
+    8164800
+
+    # Spanning a year (2019, 365 days), 12 public holidays not on weekend (see below),
+    # 52 weekends -> 365 - 52 - 52 - 12 -> 249 business days (8067600 secs)
+
+    # 2019-01-01 Tue New Year's Day
+    # 2019-03-21 Thu Human Rights Day
+    # 2019-04-19 Fri Good Friday
+    # 2019-04-22 Mon Family Day
+    # 2019-04-27 Sat Freedom Day
+    # 2019-05-01 Wed Workers' Day
+    # 2019-05-08 Wed National and provincial government elections
+    # 2019-06-16 Sun Youth Day
+    # 2019-06-17 Mon Youth Day (Observed)
+    # 2019-08-09 Fri National Women's Day
+    # 2019-09-24 Tue Heritage Day
+    # 2019-12-16 Mon Day of Reconciliation
+    # 2019-12-25 Wed Christmas Day
+    # 2019-12-26 Thu Day of Goodwill
+
+    >>> get_time_delta('2019-01-01T00:00:00.000000+02:00', '2020-01-01T00:00:00.000000+02:00')
+    8067600
+
+    # Combine the above two tests (add them together, 8067600 + 8164800 = 16232400)
+    >>> get_time_delta('2019-01-01T00:00:00.000000+02:00', '2021-01-01T00:00:00.000000+02:00')
+    16232400
 
 The ``get_iso8601_datetime`` function
 --------------------------
@@ -128,3 +171,6 @@ Tests:
 
     >>> get_iso8601_datetime('2005-12-31T01.5000000') # doctest: +SKIP
     datetime.datetime(2005, 12, 31, 1, 30)
+
+    >>> get_iso8601_datetime('20200204T073612Z')
+    datetime.datetime(2020, 2, 4, 7, 36, 12, tzinfo=datetime.timezone.utc)
