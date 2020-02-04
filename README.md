@@ -1,5 +1,7 @@
 # ZA Business Time Delta
 
+Note: Please see GitHub issues for outstanding bugs and features.
+
 **Description:**
 An API end point that will calculate the total number of South African business seconds between two ISO 8601 formatted
 time strings.
@@ -51,3 +53,45 @@ suitable error message string for failed requests.
 
 **Run tests**
 1. In activated Python 3.6 virtual environment, run command: `PYTHONPATH=$(pwd) ./tests/test_za_business_time_delta.py`
+
+**API endpoints**
+
+A helper form exists at: https://za-business-time.dnk8n.dev
+
+Simply enter two ISO 8601 compliant time strings and submit.
+
+The default example performs a GET request directly to the /time_delta endpoint, e.g
+
+- https://za-business-time.dnk8n.dev/time_delta?start_time=2019-01-01T00%3A00%3A00&end_time=2021-01-01T00%3A00%3A00
+where:
+ - **https://za-business-time.dnk8n.dev** is the base URL
+ - **/time_delta** is the endpoint that accepts GET requests
+ - **start_time** is 2019-01-01T00%3A00%3A00
+ - **end_time** is 2021-01-01T00%3A00%3A00
+or without url codes:
+- https://za-business-time.dnk8n.dev/time_delta?start_time=2019-01-01T00:00:00&end_time=2021-01-01T00:00:00
+where similar to above but:
+ - **start_time** is 2019-01-01T00:00:00
+ - **end_time** is 2021-01-01T00:00:00
+
+
+Other compatible ISO 8601 compliant formats are also accepted,
+
+e.g.
+https://za-business-time.dnk8n.dev/time_delta?start_time=1985-102T10:15Z&end_time=1985-103T10:15Z
+
+and
+
+https://za-business-time.dnk8n.dev/time_delta?start_time=1985-W15-5T10:15+04&end_time=1985-W15-5T10:11+03
+
+An example of an error:
+https://za-business-time.dnk8n.dev/time_delta?start_time=ERROR&end_time=ON_PURPOSE
+
+If you just visit the URL directly without entering eny parameters, you also receive error:
+https://za-business-time.dnk8n.dev/time_delta
+
+To prevent time ranges of greater than 40,000 days (to protect server from becoming non-responsive due to excessive load due to sub-optimal algorithm).
+
+e.g. for Error message: https://za-business-time.dnk8n.dev/time_delta?start_time=1890-6-25T00%3A00%3A00&end_time=2000-01-01T00%3A00%3A00
+
+A reimplementation of core logic will make the above unnecessary
