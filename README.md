@@ -48,3 +48,6 @@ suitable error message string for failed requests.
 
 **Contributing to tests**
 - Python's standard library, doctest is used. [Please view their documentation](https://docs.python.org/3.6/library/doctest.html)
+
+**Run tests**
+1. In activated Python 3.6 virtual environment, run command: `PYTHONPATH=$(pwd) ./tests/test_za_business_time_delta.py`
