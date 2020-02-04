@@ -23,7 +23,7 @@ suitable error message string for failed requests.
 1. cd into the root of the checked out repo directory
 1. To run outside now framework, run command: `./runserver.sh`
 1. Alternatively, run command: `now dev` ([Install and setup now if necessary](https://zeit.co/download))
-   This will deploy to a non-production server at an auto-generated private URL
+   This will deploy to a non-production server at a private IP
 1. Click on URL provided in terminal output
 
 **Non-production deployment**
