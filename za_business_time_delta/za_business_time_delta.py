@@ -184,6 +184,7 @@ def get_time_delta(start_time: str, end_time: str) -> int:
                         # print('Part Business day ahead')
                         #
                         business_seconds += (int((this_za_datetime.replace(hour=17, minute=0, second=0, microsecond=0) - this_za_datetime).total_seconds()))
+        # We want to cycle to beginning of business day in each iteration
         this_za_datetime += one_day
+        this_za_datetime = this_za_datetime.replace(hour=8, minute=0, second=0, microsecond=0)
     return business_seconds
-

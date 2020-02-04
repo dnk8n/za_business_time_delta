@@ -24,15 +24,16 @@ Tests:
     0
 
     # During public holiday weekday
-    >>> get_time_delta('2019-12-31T15:36:12+00:00', '2020-01-02T07:36:22+00:00')
+    # 17:36:12SAST (after hours) to 07:36:22 (before hours), a day after public holiday
+    >>> get_time_delta('2019-12-31T15:36:12+00:00', '2020-01-02T05:36:22+00:00')
     0
-    >>> get_time_delta('2019-12-31T15:36:12+00:00', '2020-01-02T07:36:22+01:00')
+    >>> get_time_delta('2019-12-31T15:36:12+00:00', '2020-01-02T05:36:22+01:00')
     0
-    >>> get_time_delta('2019-12-31T15:36:12Z', '2020-01-02T07:36:22Z')
+    >>> get_time_delta('2019-12-31T15:36:12Z', '2020-01-02T05:36:22Z')
     0
-    >>> get_time_delta('20191231T153612Z', '20200102T073622Z')
+    >>> get_time_delta('20191231T153612Z', '20200102T053622Z')
     0
-    >>> get_time_delta('20191231T153612+0000', '20200102T073622+0000')
+    >>> get_time_delta('20191231T153612+0000', '20200102T053622+0000')
     0
 
     # Test with fractions of a second
@@ -87,7 +88,7 @@ Tests:
     >>> get_time_delta('2020-01-02T08:00:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
     8164800
 
-    # Run test as above, except offset (increase end time) by 1 minute
+    # Run test as above, except offset (increase end time) by 1 minute - adds 60s
     >>> get_time_delta('2020-01-02T08:00:00.000000+02:00', '2021-01-04T08:01:00.000000+02:00')
     8164860
 
@@ -95,8 +96,8 @@ Tests:
     >>> get_time_delta('2019-12-31T17:00:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
     8164800
 
-    # Run test as above, except offset (increase end time) by 1 minute
-    >>> get_time_delta('2019-12-31T16:59:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
+    # Run test as above, except offset (increase start time) by 1 minute - subtracts 60s
+    >>> get_time_delta('2020-01-02T08:01:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
     8164740
 
 
