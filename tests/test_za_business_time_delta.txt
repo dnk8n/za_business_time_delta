@@ -83,6 +83,23 @@ Tests:
     >>> get_time_delta('2019-01-01T00:00:00.000000+02:00', '2021-01-01T00:00:00.000000+02:00')
     16232400
 
+    # Run test spanning year (as above), this time beginning and ending at 8am
+    >>> get_time_delta('2020-01-02T08:00:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
+    8164800
+
+    # Run test as above, except offset (increase end time) by 1 minute
+    >>> get_time_delta('2020-01-02T08:00:00.000000+02:00', '2021-01-04T08:01:00.000000+02:00')
+    8164860
+
+    # Run test spanning year (as above), this time beginning at 5pm and ending at 8am
+    >>> get_time_delta('2019-12-31T17:00:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
+    8164800
+
+    # Run test as above, except offset (increase end time) by 1 minute
+    >>> get_time_delta('2019-12-31T16:59:00.000000+02:00', '2021-01-04T08:00:00.000000+02:00')
+    8164740
+
+
 The ``get_iso8601_datetime`` function
 --------------------------
 
